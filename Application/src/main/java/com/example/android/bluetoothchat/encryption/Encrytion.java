@@ -127,7 +127,31 @@ public class Encrytion {
         return null;
     }
 
-    public static byte[] verifySignature(byte[] text , byte[] sig){
-        return null;
+    public static boolean verifySignature(byte[] text , byte[] sig , PublicKey pk){
+        Signature s = null;
+        try {
+            s = Signature.getInstance("SHA256withRSA");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            s.initVerify(pk);
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            s.update(text);
+        } catch (SignatureException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            return s.verify(sig);
+        } catch (SignatureException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

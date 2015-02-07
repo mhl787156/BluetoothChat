@@ -282,6 +282,9 @@ public class BluetoothChatFragment extends Fragment {
         @Override
         public void handleMessage(Message msg) {
             FragmentActivity activity = getActivity();
+
+
+
             switch (msg.what) {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
@@ -303,7 +306,7 @@ public class BluetoothChatFragment extends Fragment {
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
 
-                    // decrytion
+                    // decryption
 
                     mConversationArrayAdapter.add("Me:  " + writeMessage);
                     break;
