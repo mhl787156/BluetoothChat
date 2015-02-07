@@ -20,10 +20,6 @@ public class UserIdentity extends Identity {
         this.privateKey = privateKey;
 
     }
-    //hellohellohello
-    public boolean stuff(){
-        return true;
-    }
 
     public static UserIdentity createUser(String name){
 
