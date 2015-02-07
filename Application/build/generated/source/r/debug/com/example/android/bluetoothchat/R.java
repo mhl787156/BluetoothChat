@@ -293,14 +293,14 @@ containing a value of this type.
         public static final int in=0x7f09001b;
         public static final int insecure_connect_scan=0x7f09001f;
         public static final int left=0x7f09000e;
-        public static final int log_fragment=0x7f090019;
+        public static final int log_fragment=0x7f09001a;
         public static final int menu_toggle_log=0x7f090021;
         public static final int new_devices=0x7f090015;
         public static final int paired_devices=0x7f090013;
         public static final int right=0x7f09000f;
-        public static final int sample_content_fragment=0x7f09001a;
+        public static final int sample_content_fragment=0x7f090018;
         public static final int sample_main_layout=0x7f090017;
-        public static final int sample_output=0x7f090018;
+        public static final int sample_output=0x7f090019;
         public static final int secure_connect_scan=0x7f09001e;
         public static final int start=0x7f090010;
         public static final int title_new_devices=0x7f090014;
