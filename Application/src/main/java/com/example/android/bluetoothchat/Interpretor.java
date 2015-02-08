@@ -126,7 +126,7 @@ public class Interpretor {
             e.printStackTrace();
         }
 
-
+        System.out.println();
         if(Encrytion.verifySignature(message.getBytes(), Base64.decode(signature, Base64.DEFAULT), puk)) {
 
 

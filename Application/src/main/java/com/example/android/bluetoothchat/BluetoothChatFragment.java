@@ -372,6 +372,7 @@ public class BluetoothChatFragment extends Fragment {
                     }
                     break;
                 case Constants.MESSAGE_WRITE:
+
                     byte[] writeBuf = (byte[]) msg.obj;
 
                     if(lastMessage == null){
@@ -403,18 +404,20 @@ public class BluetoothChatFragment extends Fragment {
 
                     byte[] readBuf = (byte[]) msg.obj;
 
-                    System.out.println("radBuf" + new String(readBuf));
+                    System.out.println("\nradBuf:  " + new String(readBuf) + "\n\n");
 
                     if(lastMessage == null){
                         lastMessage = readBuf.clone();
-                        System.out.println("replaced last message: " + new String(lastMessage));
+                        msg.obj = new Object();
+                        System.out.println("replaced last message: " + new String(lastMessage)+ "\n\n");
                     }
                     else {
 
                         byte[] tempBuf = new byte[lastMessage.length + readBuf.length];
 
-                        System.arraycopy(lastMessage,0,tempBuf,0,lastMessage.length);
-                        System.arraycopy(readBuf , 0 , tempBuf , lastMessage.length,readBuf.length );
+
+                        System.arraycopy(lastMessage,0,tempBuf, 0 ,lastMessage.length);
+                        System.arraycopy(readBuf    ,0,tempBuf, lastMessage.length, readBuf.length);
 
                         System.out.println(tempBuf);
 
