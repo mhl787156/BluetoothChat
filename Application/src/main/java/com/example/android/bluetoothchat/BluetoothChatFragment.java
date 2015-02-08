@@ -47,6 +47,8 @@ import com.example.android.bluetoothchat.encryption.PeerIdentity;
 import com.example.android.bluetoothchat.encryption.UserIdentity;
 import com.example.android.common.logger.Log;
 
+import java.util.ArrayList;
+
 /**
  * This fragment controls Bluetooth to communicate with other devices.
  */
@@ -228,7 +230,7 @@ public class BluetoothChatFragment extends Fragment {
             byte[] send = message.getBytes();
 
             byte[] p1 = new byte[1024];
-            byte[] p2 = new byte[send.length-1024];
+            byte[] p2 = new byte[1024];
 
             System.arraycopy(send,0,p1,0,1024);
             System.arraycopy(send,1024,p2,0,send.length - 1024);
@@ -237,7 +239,7 @@ public class BluetoothChatFragment extends Fragment {
             mChatService.write(p1);
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -409,6 +411,8 @@ public class BluetoothChatFragment extends Fragment {
                     if(lastMessage == null){
                         lastMessage = readBuf.clone();
                         msg.obj = new Object();
+                        mOutStringBuffer.setLength(0);
+                        readBuf = null;
                         System.out.println("replaced last message: " + new String(lastMessage)+ "\n\n");
                     }
                     else {
@@ -418,6 +422,8 @@ public class BluetoothChatFragment extends Fragment {
 
                         System.arraycopy(lastMessage,0,tempBuf, 0 ,lastMessage.length);
                         System.arraycopy(readBuf    ,0,tempBuf, lastMessage.length, readBuf.length);
+
+                        tempBuf = removeNull(tempBuf);
 
                         System.out.println(tempBuf);
 
@@ -457,6 +463,28 @@ public class BluetoothChatFragment extends Fragment {
             }
         }
     };
+
+    private byte[] removeNull(byte[] a){
+        ArrayList<Byte> removed = new ArrayList<Byte>();
+        int count = 0;
+        for (Byte b : a){
+            if (b != 0){
+                count = 0;
+                removed.add(b);
+            } else {
+                count ++;
+                if (count > 0) {
+                    break;
+                }
+            }
+        }
+        Byte[] removedArr = removed.toArray(new Byte[0]);
+        byte[] resultArr = new byte[removedArr.length];
+        for (int i=0; i<removedArr.length; i++){
+            resultArr[i] = removedArr[i];
+        }
+        return resultArr;
+    }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
