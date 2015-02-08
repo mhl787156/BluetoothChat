@@ -30,7 +30,8 @@ public class Interpretor {
         //Open both maps from file
 
         //create default hardcode private key
-        addUser("bob",UserIdentity.createUser("bob"));
+        addUser("bob", UserIdentity.createUser("bob"));
+        addPeer("bob",new PeerIdentity("ughksadgujksdf" , userIDS.get("bob").getPublicKey() ) );
     }
 
 
@@ -57,21 +58,22 @@ public class Interpretor {
 
     public String createSendString(String name, String target, String message){
 
-        PrivateKey pk = userIDS.get(target).getPrivateKey();
+        PrivateKey pk = userIDS.get(name).getPrivateKey();
 
+        PublicKey pp = userIDS.get(name).getPublicKey();
 
         if(target.toLowerCase().equals("all")) { //If Broadcast message
+            String p = Base64.encodeToString(pp.getEncoded(),Base64.DEFAULT);
             String signedMessage = Base64.encodeToString(Encrytion.signMessage(message.getBytes() , pk), Base64.DEFAULT);
 
-            return Command.MSG_BROADCAST +  escChar + " " + escChar + " " + escChar + message + escChar + signedMessage;
+            return Command.MSG_BROADCAST +  escChar + p + escChar + " " + escChar + message + escChar + signedMessage;
 
         } else { // If privateMessage
 
-            PublicKey pp = peerIDS.get(target).getPublicKey();
             String p = Base64.encodeToString(pp.getEncoded(),Base64.DEFAULT);
             String crMessage = Base64.encodeToString(Encrytion.encryptMessage(message.getBytes(), pp), Base64.DEFAULT);
             String signedMessage = Base64.encodeToString(Encrytion.signMessage(crMessage.getBytes() , pk), Base64.DEFAULT);
-            return Command.MSG_PRIVATE + escChar + p + escChar + name + escChar + crMessage + escChar + signedMessage;
+            return Command.MSG_PRIVATE + escChar + p + escChar + target + escChar + crMessage + escChar + signedMessage;
         }
     }
 
@@ -106,12 +108,22 @@ public class Interpretor {
         String message = splitEncMessage[3];
         String signature = splitEncMessage[4];
         String pk  = splitEncMessage[1];
+        System.out.println(splitEncMessage[0]);
+        System.out.println("THIS IS PK: " + pk);
         String name = splitEncMessage[2];
 
+
         PublicKey puk = null;
+
+        //puk = peerIDS.get(name).getPublicKey();
+
         //Assuming we have everybodies publikey
         try {
-            puk = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decode(pk , Base64.DEFAULT)));
+            X509EncodedKeySpec x = new X509EncodedKeySpec(Base64.decode(pk , Base64.DEFAULT));
+            System.out.println("GOT HERE AFTER X509shit");
+            KeyFactory k = KeyFactory.getInstance("RSA");
+            System.out.println("After keyfactory");
+            puk = k.generatePublic(x);
         } catch (InvalidKeySpecException e) {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
