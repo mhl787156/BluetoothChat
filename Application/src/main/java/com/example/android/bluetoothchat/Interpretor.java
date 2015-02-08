@@ -20,8 +20,8 @@ import java.util.Map;
  */
 public class Interpretor {
 
-    private Map<String , UserIdentity> userIDS = new HashMap<>();
-    private Map<String , PeerIdentity> peerIDS = new HashMap<>();
+    public  Map<String , UserIdentity> userIDS = new HashMap<>();
+    public  Map<String , PeerIdentity> peerIDS = new HashMap<>();
 
     private final String escChar = Character.toString('\u001F');
 
@@ -30,6 +30,7 @@ public class Interpretor {
         //Open both maps from file
 
         //create default hardcode private key
+        addUser("bob",UserIdentity.createUser("bob"));
     }
 
 

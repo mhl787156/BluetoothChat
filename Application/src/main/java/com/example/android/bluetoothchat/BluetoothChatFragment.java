@@ -27,6 +27,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,6 +43,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.bluetoothchat.encryption.PeerIdentity;
+import com.example.android.bluetoothchat.encryption.UserIdentity;
 import com.example.android.common.logger.Log;
 
 /**
@@ -50,6 +53,7 @@ import com.example.android.common.logger.Log;
 public class BluetoothChatFragment extends Fragment {
 
     private static final String TAG = "BluetoothChatFragment";
+    private final String escChar = Character.toString('\u001F');
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
@@ -85,6 +89,8 @@ public class BluetoothChatFragment extends Fragment {
      * Member object for the chat services
      */
     private BluetoothChatService mChatService = null;
+
+    private Interpretor interpretor = new Interpretor();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -214,6 +220,11 @@ public class BluetoothChatFragment extends Fragment {
         // Check that there's actually something to send
         if (message.length() > 0) {
             // Get the message bytes and tell the BluetoothChatService to write
+
+            System.out.println(message);
+            message = interpretor.createSendString("bob","all",message);
+            System.out.println(message);
+
             byte[] send = message.getBytes();
 
             // message encrypted here
@@ -226,7 +237,45 @@ public class BluetoothChatFragment extends Fragment {
         }
     }
 
+    private void sendNewPeers(){
 
+
+        for(String i : interpretor.userIDS.keySet()){
+            UserIdentity id = interpretor.userIDS.get(i);
+
+            String p = Base64.encodeToString(id.getPublicKey().getEncoded(), Base64.DEFAULT);
+            String mac = mBluetoothAdapter.getAddress();
+
+            String command = Command.PEER_NEW + escChar + i + escChar + p + escChar + mac;
+
+            mChatService.write(command.getBytes());
+
+
+        }
+
+        for(String i : interpretor.peerIDS.keySet()){
+            PeerIdentity id = interpretor.peerIDS.get(i);
+
+            String p = Base64.encodeToString(id.getPublicKey().getEncoded(), Base64.DEFAULT);
+            String mac = id.getMACAddress();
+
+            String command = Command.PEER_NEW + escChar + i + escChar + p + escChar + mac;
+
+            mChatService.write(command.getBytes());
+        }
+    }
+
+    private String runCommand(String command){
+
+        String[] splitEncMessage = command.split(escChar);
+        if(splitEncMessage[0].equals("REQUEST_PEERS")){
+            sendNewPeers();
+            return null;
+        }
+        else{
+            return interpretor.decodeReceiveString(command);
+        }
+    }
 
 
     /**
@@ -309,20 +358,32 @@ public class BluetoothChatFragment extends Fragment {
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
 
-                    // decryption
+                    //decryption
+                    System.out.println(writeMessage);
+                    writeMessage = interpretor.decodeReceiveString(writeMessage);
+                    System.out.println(writeMessage);
 
-                    mConversationArrayAdapter.add("Me:  " + writeMessage);
+                    if(writeMessage != null) {
+                        mConversationArrayAdapter.add("Me:  " + writeMessage);
+                    }
                     break;
+
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     Log.d(TAG, readMessage);
 
-                    //decrytpion.
+                    //decryption
 
-                    mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                    System.out.println(readMessage);
+                    readMessage = runCommand(readMessage);
+                    System.out.println(readMessage);
+                    if(readMessage != null) {
+                        mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                    }
                     break;
+
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
                     mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
