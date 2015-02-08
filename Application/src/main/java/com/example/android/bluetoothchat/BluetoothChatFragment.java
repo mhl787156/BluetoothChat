@@ -228,7 +228,7 @@ public class BluetoothChatFragment extends Fragment {
             byte[] send = message.getBytes();
 
             byte[] p1 = new byte[1024];
-            byte[] p2 = new byte[1024];
+            byte[] p2 = new byte[send.length-1024];
 
             System.arraycopy(send,0,p1,0,1024);
             System.arraycopy(send,1024,p2,0,send.length - 1024);
@@ -403,8 +403,11 @@ public class BluetoothChatFragment extends Fragment {
 
                     byte[] readBuf = (byte[]) msg.obj;
 
+                    System.out.println("radBuf" + new String(readBuf));
+
                     if(lastMessage == null){
-                        lastMessage = readBuf;
+                        lastMessage = readBuf.clone();
+                        System.out.println("replaced last message: " + new String(lastMessage));
                     }
                     else {
 
@@ -413,13 +416,17 @@ public class BluetoothChatFragment extends Fragment {
                         System.arraycopy(lastMessage,0,tempBuf,0,lastMessage.length);
                         System.arraycopy(readBuf , 0 , tempBuf , lastMessage.length,readBuf.length );
 
+                        System.out.println(tempBuf);
+
+                        lastMessage = null;
+
                         // construct a string from the valid bytes in the buffer
-                        String readMessage = new String(tempBuf, 0, msg.arg1);
+                        String readMessage = new String(tempBuf);
                         Log.d(TAG, readMessage);
 
                         //decryption
 
-                        System.out.println(readMessage);
+                        System.out.println("ReadMessage: " + readMessage);
                         readMessage = runCommand(readMessage);
                         System.out.println(readMessage);
 

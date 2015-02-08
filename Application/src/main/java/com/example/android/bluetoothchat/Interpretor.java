@@ -108,8 +108,6 @@ public class Interpretor {
         String message = splitEncMessage[3];
         String signature = splitEncMessage[4];
         String pk  = splitEncMessage[1];
-        System.out.println(splitEncMessage[0]);
-        System.out.println("THIS IS PK: " + pk);
         String name = splitEncMessage[2];
 
 
@@ -120,9 +118,7 @@ public class Interpretor {
         //Assuming we have everybodies publikey
         try {
             X509EncodedKeySpec x = new X509EncodedKeySpec(Base64.decode(pk , Base64.DEFAULT));
-            System.out.println("GOT HERE AFTER X509shit");
             KeyFactory k = KeyFactory.getInstance("RSA");
-            System.out.println("After keyfactory");
             puk = k.generatePublic(x);
         } catch (InvalidKeySpecException e) {
             e.printStackTrace();
