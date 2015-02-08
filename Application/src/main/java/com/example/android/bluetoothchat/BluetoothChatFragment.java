@@ -226,6 +226,9 @@ public class BluetoothChatFragment extends Fragment {
         }
     }
 
+
+
+
     /**
      * The action listener for the EditText widget, to listen for the return key
      */

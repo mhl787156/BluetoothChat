@@ -5,6 +5,7 @@ package com.example.android.bluetoothchat;
  */
 public enum Command {
     PEER_NEW,
+    REQEST_PEERS,
     MSG_BROADCAST,
     MSG_PRIVATE;
 }

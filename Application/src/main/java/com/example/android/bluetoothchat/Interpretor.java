@@ -25,8 +25,16 @@ public class Interpretor {
 
     private final String escChar = Character.toString('\u001F');
 
+
     public Interpretor(){
         //Open both maps from file
+
+        //create default hardcode private key
+    }
+
+
+    public void transmitPublicKey(){
+
     }
 
     public void addUser(String name, UserIdentity userIdentity){
@@ -66,8 +74,34 @@ public class Interpretor {
         }
     }
 
-    public String decodeReceiveString(String encodedMessage){
+    public String decodeReceiveString(String encodedMessage){ // Return null iff PEER_NEW or IF Everything breaks
         String[] splitEncMessage = encodedMessage.split(escChar);
+
+        if(splitEncMessage[0].equals("PEER_NEW")) {
+            String name = splitEncMessage[1];
+            String publicKey = splitEncMessage[2];
+            String mac = splitEncMessage[3];
+
+            PublicKey publicKey1 = null;
+
+            try {
+                publicKey1 = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decode(publicKey , Base64.DEFAULT)));
+            } catch (InvalidKeySpecException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+
+            addPeer(name , new PeerIdentity(mac,publicKey1));
+
+            return null;
+        }
+        else if(splitEncMessage[0].equals("REQUEST_PEERS")){
+            //need sendPeers function.
+
+            return null;
+        }
+
         String message = splitEncMessage[3];
         String signature = splitEncMessage[4];
         String pk  = splitEncMessage[1];
@@ -98,6 +132,7 @@ public class Interpretor {
         else{
             return null;
         }
+
 
     }
 
