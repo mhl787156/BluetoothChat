@@ -227,9 +227,22 @@ public class BluetoothChatFragment extends Fragment {
 
             byte[] send = message.getBytes();
 
-            // message encrypted here
+            byte[] p1 = new byte[1024];
+            byte[] p2 = new byte[1024];
 
-            mChatService.write(send);
+            System.arraycopy(send,0,p1,0,1024);
+            System.arraycopy(send,1024,p2,0,send.length - 1024);
+
+            // message encrypted here
+            mChatService.write(p1);
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            mChatService.write(p2);
 
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
@@ -264,6 +277,7 @@ public class BluetoothChatFragment extends Fragment {
             mChatService.write(command.getBytes());
         }
     }
+
 
     private String runCommand(String command){
 
@@ -327,6 +341,10 @@ public class BluetoothChatFragment extends Fragment {
         actionBar.setSubtitle(subTitle);
     }
 
+
+
+    private byte[] lastMessage = null;
+
     /**
      * The Handler that gets information back from the BluetoothChatService
      */
@@ -355,33 +373,61 @@ public class BluetoothChatFragment extends Fragment {
                     break;
                 case Constants.MESSAGE_WRITE:
                     byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
 
-                    //decryption
-                    System.out.println(writeMessage);
-                    writeMessage = interpretor.decodeReceiveString(writeMessage);
-                    System.out.println(writeMessage);
+                    if(lastMessage == null){
+                        lastMessage = writeBuf;
+                    }
+                    else {
+                        byte[] tempBuf = new byte[lastMessage.length + writeBuf.length];
 
-                    if(writeMessage != null) {
-                        mConversationArrayAdapter.add("Me:  " + writeMessage);
+                        System.arraycopy(lastMessage,0,tempBuf,0,lastMessage.length);
+                        System.arraycopy(writeBuf , 0 , tempBuf , lastMessage.length,writeBuf.length );
+
+                        lastMessage = null;
+                        // construct a string from the buffer
+                        String writeMessage = new String(tempBuf);
+
+                        //decryption
+                        System.out.println(writeMessage);
+                        writeMessage = interpretor.decodeReceiveString(writeMessage);
+                        System.out.println(writeMessage);
+
+                        if (writeMessage != null) {
+                            mConversationArrayAdapter.add("Me:  " + writeMessage);
+                        }
                     }
                     break;
 
                 case Constants.MESSAGE_READ:
+
+
                     byte[] readBuf = (byte[]) msg.obj;
-                    // construct a string from the valid bytes in the buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    Log.d(TAG, readMessage);
 
-                    //decryption
-
-                    System.out.println(readMessage);
-                    readMessage = runCommand(readMessage);
-                    System.out.println(readMessage);
-                    if(readMessage != null) {
-                        mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                    if(lastMessage == null){
+                        lastMessage = readBuf;
                     }
+                    else {
+
+                        byte[] tempBuf = new byte[lastMessage.length + readBuf.length];
+
+                        System.arraycopy(lastMessage,0,tempBuf,0,lastMessage.length);
+                        System.arraycopy(readBuf , 0 , tempBuf , lastMessage.length,readBuf.length );
+
+                        // construct a string from the valid bytes in the buffer
+                        String readMessage = new String(tempBuf, 0, msg.arg1);
+                        Log.d(TAG, readMessage);
+
+                        //decryption
+
+                        System.out.println(readMessage);
+                        readMessage = runCommand(readMessage);
+                        System.out.println(readMessage);
+
+                        if (readMessage != null) {
+                            mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                        }
+                    }
+
                     break;
 
                 case Constants.MESSAGE_DEVICE_NAME:
