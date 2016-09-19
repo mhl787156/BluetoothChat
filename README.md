@@ -6,6 +6,10 @@ Introduction
 
 This program should be able to create networks of phones to talk to each other :)
 
+Created with Callum Mance at our first Hackathon in 2014 (Imperial Hackathon)
+
+Also first foray into Android programming!
+
 
 License
 -------
